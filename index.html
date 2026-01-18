@@ -11,50 +11,74 @@
     <style>
         /* --- PROFESSIONAL DARK BLUE THEME --- */
         :root {
-            --bg-body: #0b1121;       /* Very dark navy */
-            --bg-card: #151e32;       /* Slightly lighter navy for cards */
-            --text-main: #e2e8f0;     /* Off-white for readability */
-            --text-muted: #94a3b8;    /* Cool gray for secondary text */
-            --accent-border: #1e293b; /* Subtle borders */
-            --fan-color: #334155;     /* Inactive fan color */
+            --bg-body: #0b1121;
+            --bg-card: #151e32;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent-border: #1e293b;
+            --fan-color: #334155;
         }
 
         body { 
             background-color: var(--bg-body); 
             color: var(--text-main);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            -webkit-font-smoothing: antialiased;
         }
 
         .card { 
             background-color: var(--bg-card); 
             border: 1px solid var(--accent-border); 
             border-radius: 16px; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3); /* Stronger shadow for dark mode */
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3); 
         }
 
         h1, h2, h3, h4, h5, h6 { color: #ffffff; }
 
-        /* Overriding Bootstrap Badges for Dark Mode Contrast */
         .badge.bg-light { background-color: #334155 !important; color: #f1f5f9 !important; border: none !important; }
         .text-muted { color: var(--text-muted) !important; }
-        
-        /* Smooth transitions */
-        .badge, .btn, i, .card { transition: all 0.3s ease; }
+        .progress { background-color: #334155; }
 
-        /* Animation: Spin */
+        /* --- 3D PUSH BUTTON STYLES --- */
+        .btn-3d {
+            position: relative;
+            background: linear-gradient(to bottom, #ef4444, #dc2626); /* Red Gradient */
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 6px 0 #991b1b, 0 12px 12px rgba(0,0,0,0.4); /* The "Side" of the button */
+            transition: all 0.1s ease;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .btn-3d:active {
+            box-shadow: 0 2px 0 #991b1b, 0 4px 4px rgba(0,0,0,0.4); /* Shrink shadow */
+            transform: translateY(4px); /* Move button down */
+        }
+
+        /* Disabled State (Flat & Gray) */
+        .btn-3d:disabled {
+            background: #334155;
+            color: #64748b;
+            box-shadow: none;
+            transform: translateY(4px); /* Stays depressed or flat */
+            cursor: not-allowed;
+        }
+
+        /* --- ANIMATIONS --- */
         @keyframes spin { 100% { transform: rotate(360deg); } }
         .spin-active { animation: spin 0.8s linear infinite; }
 
-        /* Animation: Pulse (Adjusted for Dark Mode - Glowing Red) */
         @keyframes pulse-red {
             0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); border-color: rgba(239, 68, 68, 0.8); }
             70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
             100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); border-color: rgba(239, 68, 68, 0.8); }
         }
         .pulse-active { animation: pulse-red 2s infinite; }
-
-        /* Progress Bar Container in Dark Mode */
-        .progress { background-color: #334155; }
     </style>
 </head>
 <body>
@@ -104,30 +128,35 @@
                     <i class="bi bi-shield-check me-2"></i>SYSTEM LOGIC
                 </div>
                 
-                <div class="card-body text-center p-4">
+                <div class="card-body text-center p-4 d-flex flex-column justify-content-between">
                     
-                    <p class="text-muted mb-1 small fw-bold tracking-wide">CURRENT STATUS</p>
-                    <div id="mainStatusBadge" class="badge bg-success w-100 p-3 mb-4 fs-6 shadow-sm">
-                        SYSTEM SECURE
-                    </div>
-
-                    <div class="row mb-4 align-items-center">
-                        <div class="col-6 border-end border-secondary">
-                            <small class="text-muted d-block mb-2 font-monospace">EXHAUST FAN</small>
-                            <i id="fanIcon" class="bi bi-fan" style="font-size: 2.5rem; color: var(--fan-color);"></i>
-                            <p id="fanText" class="fw-bold mt-2 text-muted small mb-0">STANDBY</p>
+                    <div>
+                        <p class="text-muted mb-1 small fw-bold tracking-wide">CURRENT STATUS</p>
+                        <div id="mainStatusBadge" class="badge bg-success w-100 p-3 mb-4 fs-6 shadow-sm">
+                            SYSTEM SECURE
                         </div>
 
-                        <div class="col-6">
-                            <small class="text-muted d-block mb-2 font-monospace">SPRINKLER</small>
-                            <i id="sprinklerIcon" class="bi bi-moisture" style="font-size: 2.5rem; color: var(--fan-color);"></i>
-                            <p id="sprinklerText" class="fw-bold mt-2 text-muted small mb-0">VALVE CLOSED</p>
+                        <div class="row mb-4 align-items-center">
+                            <div class="col-6 border-end border-secondary">
+                                <small class="text-muted d-block mb-2 font-monospace">EXHAUST FAN</small>
+                                <i id="fanIcon" class="bi bi-fan" style="font-size: 2.5rem; color: var(--fan-color);"></i>
+                                <p id="fanText" class="fw-bold mt-2 text-muted small mb-0">STANDBY</p>
+                            </div>
+
+                            <div class="col-6">
+                                <small class="text-muted d-block mb-2 font-monospace">SPRINKLER</small>
+                                <i id="sprinklerIcon" class="bi bi-moisture" style="font-size: 2.5rem; color: var(--fan-color);"></i>
+                                <p id="sprinklerText" class="fw-bold mt-2 text-muted small mb-0">VALVE CLOSED</p>
+                            </div>
                         </div>
                     </div>
 
-                    <button id="btnSilence" class="btn btn-outline-secondary w-100 py-2 rounded-3 text-light" onclick="silenceAlarm()" disabled>
-                        <i class="bi bi-bell-slash-fill me-2"></i>SILENCE ALARM
-                    </button>
+                    <div class="mt-3 pb-2">
+                        <button id="btnSilence" class="btn-3d w-100 py-3" onclick="silenceAlarm()" disabled>
+                            <i class="bi bi-bell-slash-fill me-2"></i>SILENCE ALARM
+                        </button>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -141,11 +170,10 @@
 </div>
 
 <script type="module">
-    // 1. IMPORT FIREBASE
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
     import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
 
-    // 2. FIREBASE CONFIGURATION (PASTE YOUR KEYS HERE)
+    // --- REPLACE WITH YOUR CONFIG ---
     const firebaseConfig = {
         apiKey: "YOUR_API_KEY",
         authDomain: "YOUR_ID.firebaseapp.com",
@@ -156,32 +184,24 @@
         appId: "1:123456:web:abc"
     };
 
-    // 3. INITIALIZE APP
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const dataRef = ref(db, 'lab_monitor'); 
 
-    // 4. REAL-TIME DATA LISTENER
     onValue(dataRef, (snapshot) => {
         const data = snapshot.val();
         
         if (data) {
-            // --- A. UPDATE RAW VALUES ---
+            // Values
             document.getElementById('valTemp').innerText = data.temp ? data.temp.toFixed(1) : "--";
             document.getElementById('valGas').innerText = data.gas_ppm ? data.gas_ppm : "--";
-            
-            // Timestamp update
-            const now = new Date();
-            document.getElementById('lastUpdated').innerText = now.toLocaleTimeString();
+            document.getElementById('lastUpdated').innerText = new Date().toLocaleTimeString();
 
-            // --- B. AIR QUALITY VISUALS ---
-            const bar = document.getElementById('barGas');
-            const badgeAir = document.getElementById('badgeAir');
-            
+            // Progress Bar
             let gasPercent = Math.min((data.gas_ppm / 1000) * 100, 100);
-            bar.style.width = gasPercent + "%";
+            document.getElementById('barGas').style.width = gasPercent + "%";
 
-            // --- C. SYSTEM LOGIC (ALERT & COUNTERMEASURES) ---
+            // Logic Elements
             const cardAlert = document.getElementById('cardAlert');
             const headerAlert = document.getElementById('headerAlert');
             const statusBadge = document.getElementById('mainStatusBadge');
@@ -190,27 +210,27 @@
             const sprinklerIcon = document.getElementById('sprinklerIcon');
             const sprinklerText = document.getElementById('sprinklerText');
             const btnSilence = document.getElementById('btnSilence');
+            const badgeAir = document.getElementById('badgeAir');
 
+            // CRITICAL CHECK
             const isCritical = data.countermeasure_status === true || data.temp > 30 || data.gas_ppm > 400;
 
             if (isCritical) {
                 // === HAZARD MODE ===
-                cardAlert.className = "card h-100 shadow-lg pulse-active"; // Use pulse-active class
-                cardAlert.style.border = "1px solid #ef4444"; // Explicit Red Border
+                cardAlert.className = "card h-100 shadow-lg pulse-active";
+                cardAlert.style.border = "1px solid #ef4444";
                 
                 headerAlert.className = "card-header bg-danger text-white text-center fw-bold py-3";
                 headerAlert.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-2"></i>CRITICAL ALERT';
 
                 statusBadge.className = "badge bg-danger w-100 p-3 mb-4 fs-6";
-                statusBadge.innerText = "HAZARD DETECTED - ACTING";
+                statusBadge.innerText = "HAZARD DETECTED";
 
-                // Fan Active
                 fanIcon.className = "bi bi-fan text-danger spin-active"; 
                 fanIcon.style.color = "#ef4444";
-                fanText.innerText = "ACTIVE (MAX RPM)";
+                fanText.innerText = "ACTIVE";
                 fanText.className = "fw-bold mt-2 text-danger small mb-0";
 
-                // Sprinkler
                 if(data.temp > 50 || data.gas_ppm > 800) {
                     sprinklerIcon.className = "bi bi-droplet-fill text-primary";
                     sprinklerIcon.style.color = "#3b82f6"; 
@@ -218,20 +238,17 @@
                     sprinklerText.className = "fw-bold mt-2 text-primary small mb-0";
                 }
 
-                // Air Badge
                 badgeAir.className = "badge bg-danger";
                 badgeAir.innerText = "POOR";
-                bar.className = "progress-bar bg-danger";
 
-                // Button Enable
+                // ENABLE 3D BUTTON
                 btnSilence.disabled = false;
-                btnSilence.className = "btn btn-danger w-100 py-2 rounded-3";
-                btnSilence.innerHTML = '<i class="bi bi-volume-mute-fill me-2"></i>SILENCE & RESET';
+                btnSilence.innerHTML = '<i class="bi bi-volume-mute-fill me-2"></i> PUSH TO SILENCE';
 
             } else {
                 // === SAFE MODE ===
                 cardAlert.className = "card h-100";
-                cardAlert.style.border = "1px solid #1e293b"; // Reset Border
+                cardAlert.style.border = "1px solid #1e293b";
                 
                 headerAlert.className = "card-header bg-transparent text-muted text-center fw-bold py-3 border-bottom border-secondary";
                 headerAlert.innerHTML = '<i class="bi bi-shield-check me-2"></i>SYSTEM LOGIC';
@@ -239,39 +256,34 @@
                 statusBadge.className = "badge bg-success w-100 p-3 mb-4 fs-6 shadow-sm";
                 statusBadge.innerText = "SYSTEM SECURE";
 
-                // Deactivate Fan
                 fanIcon.className = "bi bi-fan";
                 fanIcon.style.color = "var(--fan-color)"; 
                 fanText.innerText = "STANDBY";
                 fanText.className = "fw-bold mt-2 text-muted small mb-0";
 
-                // Deactivate Sprinkler
                 sprinklerIcon.className = "bi bi-moisture";
                 sprinklerIcon.style.color = "var(--fan-color)"; 
                 sprinklerText.innerText = "VALVE CLOSED";
                 sprinklerText.className = "fw-bold mt-2 text-muted small mb-0";
 
-                // Air Badge
                 badgeAir.className = "badge bg-success";
                 badgeAir.innerText = "NORMAL";
-                bar.className = "progress-bar bg-success";
 
-                // Disable Button
+                // DISABLE BUTTON (FLAT)
                 btnSilence.disabled = true;
-                btnSilence.className = "btn btn-outline-secondary w-100 py-2 rounded-3 text-light";
-                btnSilence.innerHTML = '<i class="bi bi-bell-slash-fill me-2"></i>SILENCE ALARM';
+                btnSilence.innerHTML = '<i class="bi bi-bell-slash-fill me-2"></i> SILENCE ALARM';
             }
         }
     });
 
-    // 5. BUTTON FUNCTION
     window.silenceAlarm = function() {
         update(dataRef, {
             "manual_silence": true,
             "countermeasure_status": false 
-        }).then(() => {
-            alert("Signal sent: Muting alarms and resetting countermeasures...");
         });
+        // Provide immediate visual feedback on click before DB updates
+        const btn = document.getElementById('btnSilence');
+        btn.innerHTML = "SILENCING...";
     }
 </script>
 
