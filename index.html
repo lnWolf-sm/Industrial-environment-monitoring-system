@@ -3,89 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lab Monitor Pro</title>
+    <title>Lab Monitor Pro | System Control</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 
     <style>
-        body { background-color: #f8f9fa; }
-        .card { border-radius: 15px; border: none; }
-        .display-4 { font-weight: 700; }
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card { border-radius: 16px; border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        .display-4 { font-weight: 700; letter-spacing: -1px; }
         
-        /* Animation to spin the fan icon when active */
+        /* Smooth transitions for UI elements */
+        .badge, .btn, i { transition: all 0.3s ease; }
+
+        /* Animation: Spin (Used for Fan) */
         @keyframes spin { 100% { transform: rotate(360deg); } }
-        .spin-active { animation: spin 1s linear infinite; }
+        .spin-active { animation: spin 0.8s linear infinite; }
+
+        /* Animation: Pulse (Used for Hazard Badge) */
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+        }
+        .pulse-active { animation: pulse-red 2s infinite; }
     </style>
 </head>
 <body>
 
 <div class="container py-5">
-    <div class="row mb-4">
+    <div class="row mb-5">
         <div class="col-12 text-center">
-            <h1 class="fw-bold text-primary"><i class="bi bi-activity"></i> Lab Monitor Pro</h1>
-            <p class="text-muted">Real-time Safety & Environment Dashboard</p>
+            <h1 class="fw-bold text-dark"><i class="bi bi-grid-1x2-fill text-primary"></i> Lab Monitor Pro</h1>
+            <p class="text-muted">Centralized Environment & Countermeasure Controller</p>
         </div>
     </div>
 
     <div class="row g-4">
         
         <div class="col-md-4">
-            <div class="card shadow-sm h-100 p-3">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="text-muted"><i class="bi bi-thermometer-half me-2"></i>Temperature</h5>
-                    <span class="badge bg-light text-dark border">LIVE</span>
+            <div class="card h-100 p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h6 class="text-muted fw-bold text-uppercase ls-1"><i class="bi bi-thermometer-half me-2"></i>Temperature</h6>
+                    <span class="badge bg-light text-secondary border">LIVE SENSOR</span>
                 </div>
-                <div class="text-center">
-                    <h2 class="display-4 text-dark"><span id="valTemp">--</span><small class="fs-4">°C</small></h2>
-                    <p class="text-muted small">Optimal Range: 20-30°C</p>
+                <div class="text-center mt-2">
+                    <h2 class="display-4 text-dark mb-0"><span id="valTemp">--</span><small class="fs-4 text-secondary">°C</small></h2>
+                    <p class="text-muted small mt-2">Threshold: <span class="fw-bold">30.0°C</span></p>
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
-            <div class="card shadow-sm h-100 p-3">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="text-muted"><i class="bi bi-wind me-2"></i>Air Quality</h5>
-                    <span id="badgeAir" class="badge bg-success">GOOD</span>
+            <div class="card h-100 p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h6 class="text-muted fw-bold text-uppercase"><i class="bi bi-wind me-2"></i>Air Quality</h6>
+                    <span id="badgeAir" class="badge bg-success">NORMAL</span>
                 </div>
-                <div class="text-center">
-                    <h2 class="display-4 text-dark"><span id="valGas">--</span><small class="fs-4"> PPM</small></h2>
-                    <div class="progress mt-3" style="height: 10px;">
+                <div class="text-center mt-2">
+                    <h2 class="display-4 text-dark mb-0"><span id="valGas">--</span><small class="fs-4 text-secondary"> PPM</small></h2>
+                    <div class="progress mt-4 mb-2" style="height: 8px; border-radius: 10px;">
                         <div id="barGas" class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
                     </div>
+                    <p class="text-muted small">CO/Smoke Sensor (MQ-2)</p>
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
-            <div class="card shadow-sm h-100 border-danger border-2">
-                <div class="card-header bg-danger text-white text-center fw-bold">
-                    <i class="bi bi-shield-exclamation me-2"></i>ALERT & COUNTERMEASURES
+            <div id="cardAlert" class="card h-100 border-2 border-transparent"> 
+                <div id="headerAlert" class="card-header bg-light text-secondary text-center fw-bold py-3 border-0 rounded-top-4">
+                    <i class="bi bi-shield-check me-2"></i>SYSTEM LOGIC
                 </div>
-                <div class="card-body text-center">
+                
+                <div class="card-body text-center p-4">
                     
-                    <p class="text-muted mb-1 small">SYSTEM STATUS</p>
-                    <h4 id="mainStatusBadge" class="badge bg-success w-100 p-3 mb-4 fs-5">
+                    <p class="text-muted mb-1 small fw-bold tracking-wide">CURRENT STATUS</p>
+                    <div id="mainStatusBadge" class="badge bg-success w-100 p-3 mb-4 fs-6 shadow-sm">
                         SYSTEM SECURE
-                    </h4>
+                    </div>
 
-                    <div class="row mb-4">
+                    <div class="row mb-4 align-items-center">
                         <div class="col-6 border-end">
-                            <small class="text-muted d-block mb-2">EXTRACTOR FAN</small>
-                            <i id="fanIcon" class="bi bi-fan" style="font-size: 2rem; color: #ccc;"></i>
-                            <p id="fanText" class="fw-bold mt-1 text-secondary small">OFF</p>
+                            <small class="text-muted d-block mb-2 font-monospace">EXHAUST FAN</small>
+                            <i id="fanIcon" class="bi bi-fan" style="font-size: 2.5rem; color: #e2e8f0;"></i>
+                            <p id="fanText" class="fw-bold mt-2 text-secondary small mb-0">STANDBY</p>
                         </div>
 
                         <div class="col-6">
-                            <small class="text-muted d-block mb-2">SPRINKLER</small>
-                            <i id="sprinklerIcon" class="bi bi-droplet" style="font-size: 2rem; color: #ccc;"></i>
-                            <p id="sprinklerText" class="fw-bold mt-1 text-secondary small">OFF</p>
+                            <small class="text-muted d-block mb-2 font-monospace">SPRINKLER</small>
+                            <i id="sprinklerIcon" class="bi bi-moisture" style="font-size: 2.5rem; color: #e2e8f0;"></i>
+                            <p id="sprinklerText" class="fw-bold mt-2 text-secondary small mb-0">VALVE CLOSED</p>
                         </div>
                     </div>
 
-                    <button id="btnSilence" class="btn btn-outline-secondary w-100" onclick="silenceAlarm()" disabled>
-                        <i class="bi bi-volume-mute-fill me-2"></i>SILENCE ALARM
+                    <button id="btnSilence" class="btn btn-outline-secondary w-100 py-2 rounded-3" onclick="silenceAlarm()" disabled>
+                        <i class="bi bi-bell-slash-fill me-2"></i>SILENCE ALARM
                     </button>
                 </div>
             </div>
@@ -94,115 +107,157 @@
     </div>
     
     <div class="text-center mt-5 text-muted small">
-        Last Updated: <span id="lastUpdated">Waiting for data...</span>
+        <span class="me-3"><i class="bi bi-cpu"></i> Connected to ESP32</span>
+        <span>Last Sync: <span id="lastUpdated">...</span></span>
     </div>
 </div>
 
 <script type="module">
-    // 1. IMPORT FIREBASE (Standard Web Version)
+    // 1. IMPORT FIREBASE
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
     import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
 
-    // 2. CONFIGURATION (REPLACE WITH YOUR KEYS)
+    // 2. FIREBASE CONFIGURATION (PASTE YOUR KEYS HERE)
     const firebaseConfig = {
-        apiKey: "YOUR_API_KEY_HERE",
-        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-        databaseURL: "YOUR_DATABASE_URL_HERE",
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_ID.firebaseapp.com",
+        databaseURL: "YOUR_DB_URL.firebaseio.com",
         projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_PROJECT_ID.appspot.com",
-        messagingSenderId: "123456789",
-        appId: "1:123456789:web:abcdef"
+        storageBucket: "YOUR_ID.appspot.com",
+        messagingSenderId: "123456",
+        appId: "1:123456:web:abc"
     };
 
-    // 3. INITIALIZE
+    // 3. INITIALIZE APP
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const dataRef = ref(db, 'lab_monitor');
+    const dataRef = ref(db, 'lab_monitor'); // Ensure this matches your ESP32 path
 
-    // 4. LISTENER (Runs every time ESP32 updates DB)
+    // 4. REAL-TIME DATA LISTENER
     onValue(dataRef, (snapshot) => {
         const data = snapshot.val();
+        
         if (data) {
-            // Update Text Values
-            document.getElementById('valTemp').innerText = data.temp.toFixed(1);
-            document.getElementById('valGas').innerText = data.gas_ppm;
+            // --- A. UPDATE RAW VALUES ---
+            document.getElementById('valTemp').innerText = data.temp ? data.temp.toFixed(1) : "--";
+            document.getElementById('valGas').innerText = data.gas_ppm ? data.gas_ppm : "--";
             
-            // Update Timestamp
-            const date = new Date(data.timestamp * 1000);
-            document.getElementById('lastUpdated').innerText = date.toLocaleTimeString();
+            // Timestamp update
+            const now = new Date();
+            document.getElementById('lastUpdated').innerText = now.toLocaleTimeString();
 
-            // Progress Bar Logic
-            const gasPercent = Math.min((data.gas_ppm / 1000) * 100, 100);
+            // --- B. AIR QUALITY VISUALS ---
             const bar = document.getElementById('barGas');
             const badgeAir = document.getElementById('badgeAir');
+            
+            // Calculate percentage (assuming 1000ppm is max for graph)
+            let gasPercent = Math.min((data.gas_ppm / 1000) * 100, 100);
             bar.style.width = gasPercent + "%";
 
-            if(data.gas_ppm > 400) {
-                bar.className = "progress-bar bg-danger";
-                badgeAir.className = "badge bg-danger";
-                badgeAir.innerText = "HAZARD";
-            } else {
-                bar.className = "progress-bar bg-success";
-                badgeAir.className = "badge bg-success";
-                badgeAir.innerText = "GOOD";
-            }
-
-            // --- ALERT SYSTEM LOGIC ---
+            // --- C. SYSTEM LOGIC (ALERT & COUNTERMEASURES) ---
+            
+            // Select Elements
+            const cardAlert = document.getElementById('cardAlert');
+            const headerAlert = document.getElementById('headerAlert');
             const statusBadge = document.getElementById('mainStatusBadge');
+            
             const fanIcon = document.getElementById('fanIcon');
             const fanText = document.getElementById('fanText');
+            
             const sprinklerIcon = document.getElementById('sprinklerIcon');
             const sprinklerText = document.getElementById('sprinklerText');
+            
             const btnSilence = document.getElementById('btnSilence');
 
-            if (data.countermeasure_status === true) {
-                // HAZARD MODE
-                statusBadge.className = "badge bg-danger w-100 p-3 mb-4 fs-5";
-                statusBadge.innerText = "HAZARD DETECTED";
+            // THRESHOLD LOGIC: 
+            // Trigger if database says 'countermeasure_status' is TRUE 
+            // OR if local logic detects high values (Temp > 30 OR Gas > 400)
+            const isCritical = data.countermeasure_status === true || data.temp > 30 || data.gas_ppm > 400;
 
-                // Fan Active
-                fanIcon.className = "bi bi-fan text-danger spin-active";
-                fanText.innerText = "ACTIVE";
-                fanText.className = "fw-bold mt-1 text-danger small";
+            if (isCritical) {
+                // === HAZARD MODE ===
+                
+                // 1. Alert Card Styling
+                cardAlert.className = "card h-100 border-2 border-danger shadow-lg";
+                headerAlert.className = "card-header bg-danger text-white text-center fw-bold py-3";
+                headerAlert.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-2"></i>CRITICAL ALERT';
 
-                // Sprinkler Active
-                sprinklerIcon.className = "bi bi-droplet-fill text-primary";
-                sprinklerText.innerText = "ACTIVE";
-                sprinklerText.className = "fw-bold mt-1 text-primary small";
+                // 2. Main Badge
+                statusBadge.className = "badge bg-danger w-100 p-3 mb-4 fs-6 pulse-active";
+                statusBadge.innerText = "HAZARD DETECTED - ACTING";
 
-                // Enable Silence Button
+                // 3. Activate Fan (Spinning)
+                fanIcon.className = "bi bi-fan text-danger spin-active"; 
+                fanIcon.style.color = ""; // Remove inline gray
+                fanText.innerText = "ACTIVE (MAX RPM)";
+                fanText.className = "fw-bold mt-2 text-danger small mb-0";
+
+                // 4. Activate Sprinkler (If Temp is high, usually)
+                if(data.temp > 50 || data.gas_ppm > 800) {
+                    sprinklerIcon.className = "bi bi-droplet-fill text-primary";
+                    sprinklerIcon.style.color = ""; 
+                    sprinklerText.innerText = "DISCHARGING";
+                    sprinklerText.className = "fw-bold mt-2 text-primary small mb-0";
+                }
+
+                // 5. Air Badge
+                badgeAir.className = "badge bg-danger";
+                badgeAir.innerText = "POOR";
+                bar.className = "progress-bar bg-danger";
+
+                // 6. Enable Silence Button
                 btnSilence.disabled = false;
-                btnSilence.className = "btn btn-danger w-100";
+                btnSilence.className = "btn btn-danger w-100 py-2 rounded-3";
+                btnSilence.innerHTML = '<i class="bi bi-volume-mute-fill me-2"></i>SILENCE & RESET';
+
             } else {
-                // SAFE MODE
-                statusBadge.className = "badge bg-success w-100 p-3 mb-4 fs-5";
+                // === SAFE MODE ===
+                
+                // 1. Reset Card Styling
+                cardAlert.className = "card h-100 border-2 border-transparent";
+                headerAlert.className = "card-header bg-light text-secondary text-center fw-bold py-3";
+                headerAlert.innerHTML = '<i class="bi bi-shield-check me-2"></i>SYSTEM LOGIC';
+
+                // 2. Main Badge
+                statusBadge.className = "badge bg-success w-100 p-3 mb-4 fs-6 shadow-sm";
                 statusBadge.innerText = "SYSTEM SECURE";
 
-                // Fan Off
+                // 3. Deactivate Fan
                 fanIcon.className = "bi bi-fan";
-                fanIcon.style.color = "#ccc";
-                fanText.innerText = "OFF";
-                fanText.className = "fw-bold mt-1 text-secondary small";
+                fanIcon.style.color = "#e2e8f0"; // Gray out
+                fanText.innerText = "STANDBY";
+                fanText.className = "fw-bold mt-2 text-secondary small mb-0";
 
-                // Sprinkler Off
-                sprinklerIcon.className = "bi bi-droplet";
-                sprinklerIcon.style.color = "#ccc";
-                sprinklerText.innerText = "OFF";
-                sprinklerText.className = "fw-bold mt-1 text-secondary small";
+                // 4. Deactivate Sprinkler
+                sprinklerIcon.className = "bi bi-moisture";
+                sprinklerIcon.style.color = "#e2e8f0"; // Gray out
+                sprinklerText.innerText = "VALVE CLOSED";
+                sprinklerText.className = "fw-bold mt-2 text-secondary small mb-0";
 
-                // Disable Button
+                // 5. Air Badge
+                badgeAir.className = "badge bg-success";
+                badgeAir.innerText = "NORMAL";
+                bar.className = "progress-bar bg-success";
+
+                // 6. Disable Button
                 btnSilence.disabled = true;
-                btnSilence.className = "btn btn-outline-secondary w-100";
+                btnSilence.className = "btn btn-outline-secondary w-100 py-2 rounded-3";
+                btnSilence.innerHTML = '<i class="bi bi-bell-slash-fill me-2"></i>SILENCE ALARM';
             }
         }
     });
 
-    // 5. BUTTON FUNCTION (Expose to Window)
+    // 5. BUTTON FUNCTION (Update DB to turn off alarm)
     window.silenceAlarm = function() {
+        // This sends a signal back to the ESP32 to stop the buzzer/relays
         update(dataRef, {
-            "manual_silence": true
+            "manual_silence": true,
+            "countermeasure_status": false // Optional: Force status reset
+        }).then(() => {
+            alert("Signal sent: Muting alarms and resetting countermeasures...");
+        }).catch((error) => {
+            console.error("Error updating database:", error);
         });
-        alert("Signal sent: Turning off Fan & Sprinklers...");
     }
 </script>
 
