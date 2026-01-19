@@ -3,20 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lab Monitor Pro | System Control</title>
-    
+    <title>Lab Monitor Pro | Sky Edition</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 
     <style>
-        /* --- PROFESSIONAL DARK BLUE THEME --- */
+        /* --- SKY BLUE / LIGHT THEME --- */
         :root {
-            --bg-body: #0b1121;
-            --bg-card: #151e32;
-            --text-main: #e2e8f0;
-            --text-muted: #94a3b8;
-            --accent-border: #1e293b;
-            --fan-color: #334155;
+            /* Light, airy background (Sky-50) */
+            --bg-body: #f0f9ff;
+            /* White cards for clean look */
+            --bg-card: #ffffff;
+            /* Deep Blue text for high contrast (Sky-900) */
+            --text-main: #0c4a6e;
+            /* Softer blue-gray for labels (Slate-500) */
+            --text-muted: #64748b;
+            /* Light Blue border accents (Sky-200) */
+            --accent-border: #bae6fd;
+            /* Fan icon default color */
+            --fan-color: #cbd5e1;
         }
 
         body { 
@@ -30,43 +36,59 @@
             background-color: var(--bg-card); 
             border: 1px solid var(--accent-border); 
             border-radius: 16px; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3); 
-            transition: transform 0.2s;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); 
+            transition: transform 0.2s, box-shadow 0.2s;
         }
 
-        h1, h2, h3, h4, h5, h6 { color: #ffffff; }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(14, 165, 233, 0.15); /* Sky Blue Glow */
+        }
 
-        .badge.bg-light { background-color: #334155 !important; color: #f1f5f9 !important; border: none !important; }
+        /* Override Bootstrap Text Colors for Theme */
+        h1, h2, h3, h4, h5, h6 { color: var(--text-main); }
         .text-muted { color: var(--text-muted) !important; }
-        .progress { background-color: #334155; }
+        
+        /* Badges & Progress Bars */
+        .badge.bg-light { 
+            background-color: #e0f2fe !important; /* Sky-100 */
+            color: #0284c7 !important; /* Sky-600 */
+            border: 1px solid #bae6fd !important;
+        }
+        
+        .progress { 
+            background-color: #e2e8f0; /* Light Gray track */
+            overflow: hidden;
+        }
 
         /* --- 3D PUSH BUTTON STYLES --- */
         .btn-3d {
             position: relative;
-            background: linear-gradient(to bottom, #ef4444, #dc2626); /* Red Gradient */
+            background: linear-gradient(to bottom, #ef4444, #dc2626); /* Red Gradient for Alert */
             color: white;
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 1px;
             border: none;
             border-radius: 12px;
-            box-shadow: 0 6px 0 #991b1b, 0 12px 12px rgba(0,0,0,0.4); /* The "Side" of the button */
+            box-shadow: 0 6px 0 #991b1b, 0 12px 12px rgba(239, 68, 68, 0.3);
             transition: all 0.1s ease;
             cursor: pointer;
             outline: none;
         }
 
         .btn-3d:active, .btn-3d.pressed {
-            box-shadow: 0 2px 0 #991b1b, 0 4px 4px rgba(0,0,0,0.4); /* Shrink shadow */
-            transform: translateY(4px); /* Move button down */
+            box-shadow: 0 2px 0 #991b1b, 0 4px 4px rgba(0,0,0,0.4); 
+            transform: translateY(4px); 
         }
 
-        /* Disabled State (Flat & Gray) */
+        /* Disabled State (Matches Sky Theme) */
         .btn-3d:disabled {
-            background: #334155;
-            color: #64748b;
+            background: #f1f5f9;
+            color: #94a3b8;
+            border: 1px solid #e2e8f0;
             box-shadow: none;
-            transform: translateY(4px); /* Stays depressed or flat */
+            transform: translateY(4px); 
             cursor: not-allowed;
         }
 
@@ -87,22 +109,24 @@
 <div class="container py-5">
     <div class="row mb-5">
         <div class="col-12 text-center">
-            <h1 class="fw-bold"><i class="bi bi-grid-1x2-fill text-primary"></i> Lab Monitor Pro</h1>
-            <p class="text-muted">Centralized Environment & Countermeasure Controller</p>
+            <h1 class="fw-bold display-5" style="color: #0284c7;">
+                <i class="bi bi-clouds-fill me-2"></i>Lab Monitor <span style="font-weight: 300;">Sky</span>
+            </h1>
+            <p class="text-muted">Environment & Countermeasure Controller</p>
         </div>
     </div>
 
     <div class="row g-4">
-        
+
         <div class="col-md-6 col-xl-3">
             <div class="card h-100 p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h6 class="text-muted fw-bold text-uppercase ls-1"><i class="bi bi-thermometer-half me-2"></i>Temp</h6>
-                    <span class="badge bg-light border-0">DHT-22</span>
+                    <span class="badge bg-light">DHT-22</span>
                 </div>
                 <div class="text-center mt-2">
-                    <h2 class="display-4 mb-0"><span id="valTemp">--</span><small class="fs-4 text-muted">°C</small></h2>
-                    <p class="text-muted small mt-2">Limit: <span class="text-light fw-bold">30.0°C</span></p>
+                    <h2 class="display-4 mb-0 fw-bold"><span id="valTemp">--</span><small class="fs-4 text-muted">°C</small></h2>
+                    <p class="text-muted small mt-2">Limit: <span class="text-primary fw-bold">30.0°C</span></p>
                 </div>
             </div>
         </div>
@@ -111,10 +135,10 @@
             <div class="card h-100 p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h6 class="text-muted fw-bold text-uppercase ls-1"><i class="bi bi-droplet-half me-2"></i>Humidity</h6>
-                    <span class="badge bg-light border-0">DHT-22</span>
+                    <span class="badge bg-light">DHT-22</span>
                 </div>
                 <div class="text-center mt-2">
-                    <h2 class="display-4 mb-0"><span id="valHum">--</span><small class="fs-4 text-muted">%</small></h2>
+                    <h2 class="display-4 mb-0 fw-bold"><span id="valHum">--</span><small class="fs-4 text-muted"> %</small></h2>
                     <div class="progress mt-4 mb-2" style="height: 6px; border-radius: 10px;">
                         <div id="barHum" class="progress-bar bg-info" role="progressbar" style="width: 0%"></div>
                     </div>
@@ -130,7 +154,7 @@
                     <span id="badgeAir" class="badge bg-success">MQ-135</span>
                 </div>
                 <div class="text-center mt-2">
-                    <h2 class="display-4 mb-0"><span id="valGas">--</span><small class="fs-4 text-muted"> PPM</small></h2>
+                    <h2 class="display-4 mb-0 fw-bold"><span id="valGas">--</span><small class="fs-4 text-muted"> PPM</small></h2>
                     <div class="progress mt-4 mb-2" style="height: 8px; border-radius: 10px;">
                         <div id="barGas" class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
                     </div>
@@ -140,36 +164,36 @@
         </div>
 
         <div class="col-md-6 col-xl-3">
-    <div class="card h-100 p-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h6 class="text-muted fw-bold text-uppercase"><i class="bi bi-fire me-2"></i>Combustible</h6>
-            <span class="badge bg-warning text-dark">MQ-2</span>
-        </div>
-        <div class="text-center mt-2">
-            <h2 class="display-4 mb-0"><span id="valSmoke">--</span><small class="fs-4 text-muted"> PPM</small></h2>
-            <div class="progress mt-4 mb-2" style="height: 8px; border-radius: 10px;">
-                <div id="barSmoke" class="progress-bar bg-warning" role="progressbar" style="width: 0%"></div>
+            <div class="card h-100 p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h6 class="text-muted fw-bold text-uppercase"><i class="bi bi-fire me-2"></i>Combustible</h6>
+                    <span class="badge bg-warning text-dark">MQ-2</span>
+                </div>
+                <div class="text-center mt-2">
+                    <h2 class="display-4 mb-0 fw-bold"><span id="valSmoke">--</span><small class="fs-4 text-muted"> PPM</small></h2>
+                    <div class="progress mt-4 mb-2" style="height: 8px; border-radius: 10px;">
+                        <div id="barSmoke" class="progress-bar bg-warning" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <p class="text-muted small">LPG / Smoke / Propane</p>
+                </div>
             </div>
-            <p class="text-muted small">LPG / Smoke / Propane</p>
         </div>
-    </div>
-</div>
 
         <div class="col-md-6 col-xl-3">
             <div id="cardAlert" class="card h-100"> 
-                <div id="headerAlert" class="card-header bg-transparent text-muted text-center fw-bold py-3 border-bottom border-secondary">
+                <div id="headerAlert" class="card-header bg-transparent text-muted text-center fw-bold py-3 border-bottom" style="border-color: var(--accent-border);">
                     <i class="bi bi-shield-check me-2"></i>SYSTEM LOGIC
                 </div>
-                
+
                 <div class="card-body text-center p-4 d-flex flex-column justify-content-between">
-                    
+
                     <div>
                         <div id="mainStatusBadge" class="badge bg-success w-100 p-3 mb-4 fs-6 shadow-sm">
                             SYSTEM SECURE
                         </div>
 
                         <div class="row mb-4 align-items-center">
-                            <div class="col-6 border-end border-secondary">
+                            <div class="col-6 border-end" style="border-color: var(--accent-border) !important;">
                                 <small class="text-muted d-block mb-2 font-monospace">FAN</small>
                                 <i id="fanIcon" class="bi bi-fan" style="font-size: 2rem; color: var(--fan-color);"></i>
                                 <p id="fanText" class="fw-bold mt-2 text-muted small mb-0">OFF</p>
@@ -194,7 +218,7 @@
         </div>
 
     </div>
-    
+
     <div class="text-center mt-5 text-muted small">
         <span class="me-3"><i class="bi bi-cpu"></i> Connected to ESP32</span>
         <span>Last Sync: <span id="lastUpdated">...</span></span>
@@ -222,22 +246,27 @@
 
     onValue(dataRef, (snapshot) => {
         const data = snapshot.val();
-        
+
         if (data) {
             // 1. UPDATE NUMERICAL VALUES
             document.getElementById('valTemp').innerText = data.temp ? data.temp.toFixed(1) : "--";
-            document.getElementById('valHum').innerText = data.humidity ? data.humidity.toFixed(0) : "--"; // Added Humidity
+            document.getElementById('valHum').innerText = data.humidity ? data.humidity.toFixed(0) : "--";
             document.getElementById('valGas').innerText = data.gas_ppm ? data.gas_ppm : "--";
+            document.getElementById('valSmoke').innerText = data.smoke_ppm ? data.smoke_ppm : "--";
             document.getElementById('lastUpdated').innerText = new Date().toLocaleTimeString();
 
             // 2. UPDATE PROGRESS BARS
             // Humidity Bar
             let humPercent = data.humidity ? data.humidity : 0;
             document.getElementById('barHum').style.width = humPercent + "%";
-            
-            // Gas Bar
+
+            // Gas Bar (Scale 0-1000)
             let gasPercent = Math.min((data.gas_ppm / 1000) * 100, 100);
             document.getElementById('barGas').style.width = gasPercent + "%";
+
+            // Smoke Bar (Scale 0-1000)
+            let smokePercent = Math.min((data.smoke_ppm / 1000) * 100, 100);
+            document.getElementById('barSmoke').style.width = smokePercent + "%";
 
 
             // 3. LOGIC ELEMENTS
@@ -252,13 +281,15 @@
             const badgeAir = document.getElementById('badgeAir');
 
             // CRITICAL CHECK LOGIC
+            // Checks if hardware flag is TRUE, or temp > 30, or Gas > 400
             const isCritical = data.countermeasure_status === true || data.temp > 30 || data.gas_ppm > 400;
 
             if (isCritical) {
                 // === HAZARD MODE ===
                 cardAlert.className = "card h-100 shadow-lg pulse-active";
-                cardAlert.style.border = "1px solid #ef4444";
-                
+                // Red Border override
+                cardAlert.style.border = "1px solid #ef4444"; 
+
                 headerAlert.className = "card-header bg-danger text-white text-center fw-bold py-3";
                 headerAlert.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-2"></i>CRITICAL';
 
@@ -270,7 +301,7 @@
                 fanText.innerText = "ACTIVE";
                 fanText.className = "fw-bold mt-2 text-danger small mb-0";
 
-                // Example Sprinkler Logic: Only if VERY critical
+                // Sprinkler Logic (Threshold example)
                 if(data.temp > 50 || data.gas_ppm > 800) {
                     sprinklerIcon.className = "bi bi-droplet-fill text-primary";
                     sprinklerIcon.style.color = "#3b82f6"; 
@@ -283,7 +314,6 @@
 
                 // ENABLE 3D BUTTON
                 btnSilence.disabled = false;
-                // If previously clicked, keep the "SENT" text briefly, otherwise reset
                 if(btnSilence.innerText !== "COMMAND SENT") {
                     btnSilence.innerHTML = '<i class="bi bi-volume-mute-fill me-2"></i> PUSH TO SILENCE';
                 }
@@ -291,9 +321,10 @@
             } else {
                 // === SAFE MODE ===
                 cardAlert.className = "card h-100";
-                cardAlert.style.border = "1px solid #1e293b";
-                
-                headerAlert.className = "card-header bg-transparent text-muted text-center fw-bold py-3 border-bottom border-secondary";
+                // Reset to Sky Blue border
+                cardAlert.style.border = "1px solid #bae6fd"; 
+
+                headerAlert.className = "card-header bg-transparent text-muted text-center fw-bold py-3 border-bottom";
                 headerAlert.innerHTML = '<i class="bi bi-shield-check me-2"></i>SYSTEM LOGIC';
 
                 statusBadge.className = "badge bg-success w-100 p-3 mb-4 fs-6 shadow-sm";
@@ -321,11 +352,11 @@
 
     window.silenceAlarm = function() {
         const btn = document.getElementById('btnSilence');
-        
-        // 1. Visual Feedback (Press Down)
+
+        // 1. Visual Feedback
         btn.classList.add('pressed');
         btn.innerHTML = "COMMAND SENT";
-        
+
         // 2. Send to Firebase
         update(dataRef, {
             "manual_silence": true,
