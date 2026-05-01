@@ -2,109 +2,128 @@
 #include <FirebaseESP32.h>
 #include "DHT.h"
 
-// --- HARDWARE CONFIGURATION ---
-
-// SENSORS
-#define PIN_DHT 33      
-#define PIN_MQ135 34    // Analog Input
-#define PIN_MQ2 35      // Analog Input
-#define PIN_VIB 25      // Vibration (Digital Input)
-#define PIN_PIR 12      // Motion (Digital Input)
-
-// ACTUATORS (Active Low Relays: LOW = ON)
-#define RELAY_FAN 14    // Cooling Fan
-#define RELAY_PUMP 26   // Sprinkler Pump
-#define RELAY_AUX 27    // Exhaust Fan / Alarm (Assigned to D27)
-
-// CONSTANTS
-#define DHTTYPE DHT22
-const int GAS_LIMIT = 1200;       // Gas threshold
-const float TEMP_COOL_LIMIT = 28.0; // Fan turns on
-const float TEMP_FIRE_LIMIT = 45.0; // Fire logic temp
-
-// WIFI & FIREBASE
+// --- 1. CONFIGURATION ---
+// REPLACE WITH YOUR WIFI DETAILS
 #define WIFI_SSID "YOUR_WIFI_NAME"
-#define WIFI_PASS "YOUR_WIFI_PASSWORD"
-#define DB_URL "environment-monitoring-s-1885c-default-rtdb.asia-southeast1.firebasedatabase.app"
-#define DB_SECRET "YOUR_FIREBASE_SECRET"
+#define WIFI_PASSWORD "YOUR_WIFI_PASSWORD"
 
+// YOUR EXACT CREDENTIALS
+#define API_KEY "secret"
+#define DATABASE_URL "secret firebase url"
+
+// --- 2. HARDWARE PINS ---
+#define PIN_DHT 33      
+#define PIN_MQ135 34    
+#define PIN_MQ2 35      
+#define PIN_VIB 25      
+#define PIN_PIR 12      
+
+// RELAYS (Active Low: LOW = ON)
+#define RELAY_FAN 14     // Cooling Fan
+#define RELAY_PUMP 26    // Sprinkler
+#define RELAY_EXHAUST 27 // Exhaust Fan
+
+#define DHTTYPE DHT22
+const int GAS_LIMIT = 1200;       
+const float TEMP_COOL_LIMIT = 28.0; 
+const float TEMP_FIRE_LIMIT = 45.0; 
+
+// --- 3. OBJECTS ---
 DHT dht(PIN_DHT, DHTTYPE);
 FirebaseData fbdo;
-FirebaseConfig config;
 FirebaseAuth auth;
+FirebaseConfig config;
+
+unsigned long lastCycle = 0;
 
 void setup() {
   Serial.begin(115200);
   
-  // Init Sensors
   dht.begin();
-  analogReadResolution(12); // ESP32 default is 12-bit (0-4095)
   pinMode(PIN_VIB, INPUT);
   pinMode(PIN_PIR, INPUT);
-  
-  // Init Relays (Start OFF = HIGH)
   pinMode(RELAY_FAN, OUTPUT);
   pinMode(RELAY_PUMP, OUTPUT);
-  pinMode(RELAY_AUX, OUTPUT);
+  pinMode(RELAY_EXHAUST, OUTPUT);
+  
+  // Default OFF
   digitalWrite(RELAY_FAN, HIGH);
   digitalWrite(RELAY_PUMP, HIGH);
-  digitalWrite(RELAY_AUX, HIGH);
+  digitalWrite(RELAY_EXHAUST, HIGH);
 
-  // Connect Network
-  WiFi.begin(WIFI_SSID, WIFI_PASS);
-  Serial.print("Connecting");
-  while (WiFi.status() != WL_CONNECTED) { delay(500); Serial.print("."); }
-  Serial.println(" Connected!");
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  Serial.print("Connecting to WiFi");
+  while (WiFi.status() != WL_CONNECTED) { Serial.print("."); delay(300); }
+  Serial.println("\nConnected!");
 
-  // Connect Database
-  config.host = DB_URL;
-  config.signer.tokens.legacy_token = DB_SECRET;
+  config.api_key = API_KEY;
+  config.database_url = DATABASE_URL;
   Firebase.begin(&config, &auth);
   Firebase.reconnectWiFi(true);
 }
 
 void loop() {
-  // 1. Read Data
-  float h = dht.readHumidity();
-  float t = dht.readTemperature();
-  int mq135 = analogRead(PIN_MQ135);
-  int mq2 = analogRead(PIN_MQ2);
-  int vib = digitalRead(PIN_VIB);
-  int pir = digitalRead(PIN_PIR);
+  if (millis() - lastCycle > 1000) {
+    
+    // 1. READ SENSORS
+    float h = dht.readHumidity();
+    float t = dht.readTemperature();
+    int mq135 = analogRead(PIN_MQ135);
+    int mq2 = analogRead(PIN_MQ2);
+    int vib = digitalRead(PIN_VIB);
+    int pir = digitalRead(PIN_PIR);
+    if (isnan(h) || isnan(t)) t = 0;
 
-  if (isnan(h) || isnan(t)) { Serial.println("DHT Error"); return; }
+    // 2. READ DASHBOARD CONTROLS (Manual Override)
+    bool cmd_ExFan = false;
+    bool cmd_Cooling = false;
+    bool cmd_Sprinkler = false;
+    bool cmd_Security = false;
 
-  // 2. Logic Evaluation
-  bool isHot = (t > TEMP_COOL_LIMIT);
-  // Fire = High Temp AND Smoke
-  bool isFire = (t > TEMP_FIRE_LIMIT && mq2 > (GAS_LIMIT / 2)); 
-  // Hazard = Gas Leak OR Fire OR Vibration
-  bool isHazard = (mq135 > GAS_LIMIT || mq2 > GAS_LIMIT || isFire || vib == HIGH);
+    // We check the specific "Controls" path created by the dashboard switches
+    if (Firebase.getString(fbdo, "/Device-1/Controls/ExFan")) 
+      cmd_ExFan = (fbdo.stringData() == "ON");
+    if (Firebase.getString(fbdo, "/Device-1/Controls/Cooling")) 
+      cmd_Cooling = (fbdo.stringData() == "ON");
+    if (Firebase.getString(fbdo, "/Device-1/Controls/Sprinkler")) 
+      cmd_Sprinkler = (fbdo.stringData() == "ON");
+    if (Firebase.getString(fbdo, "/Device-1/Controls/SecurityMode")) 
+      cmd_Security = (fbdo.stringData() == "ARMED");
 
-  // 3. Hardware Control (Active Low Logic)
-  digitalWrite(RELAY_FAN, isHot ? LOW : HIGH);      // Fan Logic
-  digitalWrite(RELAY_PUMP, isFire ? LOW : HIGH);    // Sprinkler Logic
-  digitalWrite(RELAY_AUX, isHazard ? LOW : HIGH);   // General Alarm Logic
+    // 3. SAFETY LOGIC (Overrides Manual OFF)
+    bool need_Exhaust = (mq135 > GAS_LIMIT || mq2 > GAS_LIMIT);
+    bool need_Cooling = (t > TEMP_COOL_LIMIT);
+    bool need_Sprinkler = (t > TEMP_FIRE_LIMIT && mq2 > (GAS_LIMIT / 2));
 
-  // 4. Send to Firebase
-  FirebaseJson status;
-  status.set("Temp", t);
-  status.set("Hum", h);
-  status.set("MQ-2", mq2);
-  status.set("MQ-135", mq135);
-  status.set("Vibration", vib);
-  status.set("PIR", pir);
-  Firebase.updateNode(fbdo, "/Device-1/Status", status);
+    // 4. THEFT LOGIC
+    bool theft_Alert = (cmd_Security && pir == HIGH);
 
-  FirebaseJson alert;
-  alert.set("IsAlert", isHazard);
-  alert.set("Cooling fan", isHot ? "ON" : "OFF");
-  alert.set("sprinkler", isFire ? "ON" : "OFF");
-  alert.set("ExFan", isHazard ? "ON" : "OFF"); // Aux relay acts as Exhaust/Alarm
-  Firebase.updateNode(fbdo, "/Device-1/Alert", alert);
+    // 5. DECIDE RELAY STATE (Manual ON OR Safety ON)
+    bool state_ExFan = cmd_ExFan || need_Exhaust;
+    bool state_Cooling = cmd_Cooling || need_Cooling;
+    bool state_Sprinkler = cmd_Sprinkler || need_Sprinkler;
 
-  // Debug
-  Serial.printf("T:%.1f | VIB:%d | PIR:%d | Hazard:%d\n", t, vib, pir, isHazard);
-  
-  delay(1000);
+    // 6. ACTUATE
+    digitalWrite(RELAY_EXHAUST, state_ExFan ? LOW : HIGH);
+    digitalWrite(RELAY_FAN, state_Cooling ? LOW : HIGH);
+    digitalWrite(RELAY_PUMP, state_Sprinkler ? LOW : HIGH);
+
+    // 7. SYNC WITH FIREBASE
+    Firebase.setFloat(fbdo, "/Device-1/Status/Temp", t);
+    Firebase.setFloat(fbdo, "/Device-1/Status/Hum", h);
+    Firebase.setInt(fbdo, "/Device-1/Status/MQ-135", mq135);
+    Firebase.setInt(fbdo, "/Device-1/Status/MQ-2", mq2);
+    Firebase.setInt(fbdo, "/Device-1/Status/Vibration", vib);
+    Firebase.setInt(fbdo, "/Device-1/Status/PIR", pir);
+    
+    // Update Alerts
+    Firebase.setBool(fbdo, "/Device-1/Alert/Theft", theft_Alert);
+    
+    // Feedback: If Safety forced a fan ON, update the database so the dashboard switch flips ON too
+    if (need_Exhaust && !cmd_ExFan) Firebase.setString(fbdo, "/Device-1/Controls/ExFan", "ON");
+    if (need_Cooling && !cmd_Cooling) Firebase.setString(fbdo, "/Device-1/Controls/Cooling", "ON");
+    if (need_Sprinkler && !cmd_Sprinkler) Firebase.setString(fbdo, "/Device-1/Controls/Sprinkler", "ON");
+
+    lastCycle = millis();
+  }
 }
